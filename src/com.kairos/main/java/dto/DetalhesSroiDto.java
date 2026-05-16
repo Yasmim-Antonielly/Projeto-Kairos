@@ -1,6 +1,6 @@
-package model;
+package dto;
 
-public class RelatorioSroi {
+public class DetalhesSroiDto {
     private Long id;
     private Long projetoId;
     private Double valorInvestido;
@@ -8,25 +8,16 @@ public class RelatorioSroi {
     private Double indiceSroi;
     private String analiseIa;
 
-    public RelatorioSroi() {}
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getProjetoId() { return projetoId; }
     public void setProjetoId(Long projetoId) { this.projetoId = projetoId; }
     public Double getValorInvestido() { return valorInvestido; }
-    public void setValorInvestido(Double v) { this.valorInvestido = v; }
+    public void setValorInvestido(Double valorInvestido) { this.valorInvestido = valorInvestido; }
     public Double getValorImpactoSocial() { return valorImpactoSocial; }
-    public void setValorImpactoSocial(Double v) { this.valorImpactoSocial = v; }
+    public void setValorImpactoSocial(Double valorImpactoSocial) { this.valorImpactoSocial = valorImpactoSocial; }
     public Double getIndiceSroi() { return indiceSroi; }
-    public void setIndiceSroi(Double v) { this.indiceSroi = v; }
+    public void setIndiceSroi(Double indiceSroi) { this.indiceSroi = indiceSroi; }
     public String getAnaliseIa() { return analiseIa; }
     public void setAnaliseIa(String analiseIa) { this.analiseIa = analiseIa; }
-
-    public String toJson() {
-        return String.format(
-                "{\"id\":%s,\"projetoId\":%d,\"valorInvestido\":%.2f,\"valorImpactoSocial\":%.2f,\"indiceSroi\":%.2f,\"analiseIa\":\"%s\"}",
-                id != null ? id.toString() : "null",
-                projetoId, valorInvestido, valorImpactoSocial, indiceSroi,
-                analiseIa != null ? analiseIa.replace("\"", "'").replace("\n", " ") : "");
-    }
 }
