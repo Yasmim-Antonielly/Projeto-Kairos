@@ -1,0 +1,7 @@
+{
+    "projetoSocialId": 1,
+    "valorInvestido": 65000.0,
+    "caminhoRecibos": "raw_data/receipts/projeto_1/",
+    "caminhoFotos": "raw_data/photos/projeto_1/",
+    "dadosBrutosTexto": "=== DADOS EVIDENCIADOS DE AUDITORIA (PROJETO 1) ===\nArquivos de Recebíveis Processados: 2 recibos, 1 fotos de evidência.\nInvestimento Financeiro Comprovado via Auditor: R$ 65,000.00\n--- RELATOS E FEEDBACK DA COMUNIDADE AVALIADOS ---\nRelato consolidado dos moradores da regiao ribeirinha:\nO plantio de arvores ja melhorou muito a qualidade do solo e evitou o desmoronamento da margem.\nCerca de 200 familias foram diretamente beneficiadas pela reducao de alagamentos na estrada.\nO projeto de reflorestamento gerou engajamento de dezenas de voluntarios locais.\n\n"
+}

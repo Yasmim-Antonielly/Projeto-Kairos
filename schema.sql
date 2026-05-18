@@ -1,0 +1,119 @@
+-- ==========================================
+-- PROJETO KAIRÓS - BANCO DE DADOS E PERSISTÊNCIA
+-- ARQUIVO: schema.sql (Oracle SQL DDL + DML)
+-- ==========================================
+
+-- --- DROP TABLES AND SEQUENCES (If they exist) ---
+BEGIN
+    EXECUTE IMMEDIATE 'DROP TABLE KAIROS_AUDITORIA_IMPACTO CASCADE CONSTRAINTS';
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP TABLE KAIROS_PROJETO_SOCIAL CASCADE CONSTRAINTS';
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP TABLE KAIROS_INVESTIDOR CASCADE CONSTRAINTS';
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP SEQUENCE KAIROS_PROJ_SOCIAL_SEQ';
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP SEQUENCE KAIROS_INVESTIDOR_SEQ';
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP SEQUENCE KAIROS_AUDITORIA_SEQ';
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+-- --- CREATE SEQUENCES ---
+CREATE SEQUENCE KAIROS_PROJ_SOCIAL_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE KAIROS_INVESTIDOR_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE KAIROS_AUDITORIA_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+-- --- CREATE TABLES ---
+
+-- 1. PROJETO SOCIAL
+-- Armazena os dados dos projetos ou ONGs, metas de impacto e orçamento necessário.
+CREATE TABLE KAIROS_PROJETO_SOCIAL (
+    ID NUMBER(19) PRIMARY KEY,
+    TITULO VARCHAR2(150) NOT NULL,
+    DESCRICAO VARCHAR2(1000) NOT NULL,
+    CATEGORIA_ESG VARCHAR2(50) NOT NULL, -- Ex: AMBIENTAL, SOCIAL, GOVERNANCA
+    ORCAMENTO_NECESSARIO NUMBER(15,2) NOT NULL,
+    ONG_RESPONSAVEL VARCHAR2(100) NOT NULL,
+    CNPJ VARCHAR2(18) NOT NULL,
+    METAS_COMUNIDADE VARCHAR2(2000)
+);
+
+-- 2. INVESTIDOR
+-- Armazena dados dos fundos ou investidores-anjo, incluindo suas preferências ESG e tese de investimento.
+CREATE TABLE KAIROS_INVESTIDOR (
+    ID NUMBER(19) PRIMARY KEY,
+    NOME VARCHAR2(100) NOT NULL,
+    TIPO_INVESTIDOR VARCHAR2(50) NOT NULL, -- Ex: ANJO, FUNDO, CORPORATIVO
+    TESE_INVESTIMENTO VARCHAR2(1000),
+    CRITERIOS_ESG VARCHAR2(1000),
+    ORCAMENTO_DISPONIVEL NUMBER(15,2) NOT NULL,
+    CNPJ_CPF VARCHAR2(18) NOT NULL
+);
+
+-- 3. AUDITORIA DE IMPACTO
+-- Armazena os cálculos de SROI, auditoria de dados brutos e relatórios de inteligência artificial.
+CREATE TABLE KAIROS_AUDITORIA_IMPACTO (
+    ID NUMBER(19) PRIMARY KEY,
+    PROJETO_SOCIAL_ID NUMBER(19) NOT NULL,
+    VALOR_INVESTIDO NUMBER(15,2) NOT NULL,
+    VALOR_RETORNO_SOCIAL NUMBER(15,2) NOT NULL,
+    INDICE_SROI NUMBER(8,2) NOT NULL, -- Valor de impacto social gerado dividido pelo valor investido
+    CAMINHO_RECIBOS VARCHAR2(255),
+    CAMINHO_FOTOS VARCHAR2(255),
+    DADOS_BRUTOS_TEXTO CLOB,
+    ANALISE_IA CLOB,
+    STATUS_AUDITORIA VARCHAR2(50) DEFAULT 'EM_ANALISE' NOT NULL, -- Ex: APROVADO, EM_ANALISE, REJEITADO
+    DATA_AUDITORIA DATE DEFAULT SYSDATE NOT NULL,
+    CONSTRAINT FK_AUDITORIA_PROJETO FOREIGN KEY (PROJETO_SOCIAL_ID) 
+        REFERENCES KAIROS_PROJETO_SOCIAL(ID) ON DELETE CASCADE
+);
+
+-- --- INSERÇÕES INICIAIS (SEED DATA) ---
+
+-- 1. Projeto Social Seeds
+INSERT INTO KAIROS_PROJETO_SOCIAL (ID, TITULO, DESCRICAO, CATEGORIA_ESG, ORCAMENTO_NECESSARIO, ONG_RESPONSAVEL, CNPJ, METAS_COMUNIDADE)
+VALUES (KAIROS_PROJ_SOCIAL_SEQ.NEXTVAL, 'Refloresta Tietê', 'Plantio de mudas nativas às margens do rio Tietê para conter a erosão e recuperar a biodiversidade local.', 'AMBIENTAL', 85000.00, 'SOS Mata Atlântica', '12.345.678/0001-90', 'Plantar 5000 árvores nativas em 6 meses, revitalizando 2 hectares.');
+
+INSERT INTO KAIROS_PROJETO_SOCIAL (ID, TITULO, DESCRICAO, CATEGORIA_ESG, ORCAMENTO_NECESSARIO, ONG_RESPONSAVEL, CNPJ, METAS_COMUNIDADE)
+VALUES (KAIROS_PROJ_SOCIAL_SEQ.NEXTVAL, 'Coders da Quebrada', 'Curso técnico de programação Web (React e Node) para jovens da periferia de São Paulo.', 'SOCIAL', 120000.00, 'Gerando Falcões', '98.765.432/0001-10', 'Capacitar 50 jovens, com taxa de empregabilidade mínima de 70% em até 3 meses após a conclusão.');
+
+INSERT INTO KAIROS_PROJETO_SOCIAL (ID, TITULO, DESCRICAO, CATEGORIA_ESG, ORCAMENTO_NECESSARIO, ONG_RESPONSAVEL, CNPJ, METAS_COMUNIDADE)
+VALUES (KAIROS_PROJ_SOCIAL_SEQ.NEXTVAL, 'Recicla Favela', 'Cooperativa ecológica e coleta seletiva autônoma gerando renda e reduzindo lixo em áreas urbanas densas.', 'AMBIENTAL', 45000.00, 'ONG Reciclar', '45.123.789/0001-50', 'Coletar e reciclar 12 toneladas de plástico no primeiro ano, gerando renda estável para 15 catadores locais.');
+
+-- 2. Investidor Seeds
+INSERT INTO KAIROS_INVESTIDOR (ID, NOME, TIPO_INVESTIDOR, TESE_INVESTIMENTO, CRITERIOS_ESG, ORCAMENTO_DISPONIVEL, CNPJ_CPF)
+VALUES (KAIROS_INVESTIDOR_SEQ.NEXTVAL, 'Impact Capital', 'FUNDO', 'Apoiar negócios sociais escaláveis nas áreas de educação e sustentabilidade ambiental.', 'Foco alto em Ambiental e Social com metas transparentes.', 2000000.00, '11.222.333/0001-44');
+
+INSERT INTO KAIROS_INVESTIDOR (ID, NOME, TIPO_INVESTIDOR, TESE_INVESTIMENTO, CRITERIOS_ESG, ORCAMENTO_DISPONIVEL, CNPJ_CPF)
+VALUES (KAIROS_INVESTIDOR_SEQ.NEXTVAL, 'Luiza Helena Trajano', 'ANJO', 'Promover a equidade social e empoderamento digital de minorias.', 'Foco máximo no pilar Social e Governança corporativa ética.', 500000.00, '222.333.444-55');
+
+INSERT INTO KAIROS_INVESTIDOR (ID, NOME, TIPO_INVESTIDOR, TESE_INVESTIMENTO, CRITERIOS_ESG, ORCAMENTO_DISPONIVEL, CNPJ_CPF)
+VALUES (KAIROS_INVESTIDOR_SEQ.NEXTVAL, 'Green Angel Network', 'ANJO', 'Foco exclusivo em investimentos verdes e redução de pegada de carbono no ecossistema urbano.', 'Rigidez de critérios ambientais (E) e reporte constante.', 750000.00, '55.666.777/0001-88');
+
+-- 3. Auditoria de Impacto Seeds (Vinculado ao primeiro projeto: Refloresta Tietê)
+INSERT INTO KAIROS_AUDITORIA_IMPACTO (ID, PROJETO_SOCIAL_ID, VALOR_INVESTIDO, VALOR_RETORNO_SOCIAL, INDICE_SROI, CAMINHO_RECIBOS, CAMINHO_FOTOS, DADOS_BRUTOS_TEXTO, ANALISE_IA, STATUS_AUDITORIA)
+VALUES (KAIROS_AUDITORIA_SEQ.NEXTVAL, 1, 85000.00, 255000.00, 3.00, 'raw_data/receipts/projeto_1_recibos_consolidado.pdf', 'raw_data/photos/projeto_1_antes_depois.jpg', 'Recibo de mudas: R$45.000; Recibo de ferramentas: R$20.000; Transporte e alimentação voluntários: R$20.000.', 'Análise IA: O projeto gerou R$3,00 de valor social para cada R$1,00 investido. O impacto ambiental foi altíssimo com restauração de mata ciliar e proteção hídrica.', 'APROVADO');
+
+COMMIT;
