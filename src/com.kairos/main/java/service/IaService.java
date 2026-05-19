@@ -8,11 +8,15 @@ import java.net.http.HttpResponse;
 
 public class IaService {
 
-    private static final String API_KEY = "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";
+    private static final String API_KEY = System.getenv("GROQ_API_KEY");
     private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
     private final HttpClient client = HttpClient.newHttpClient();
 
     public String analisarRelato(String relato) {
+        if (API_KEY == null || API_KEY.isBlank()) {
+            return "Erro: A variável de ambiente GROQ_API_KEY não foi configurada.";
+        }
+
         if (relato == null || relato.isBlank()) {
             return "Relato não informado. Análise indisponível.";
         }
