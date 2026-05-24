@@ -3,7 +3,7 @@ package dto;
 public class CadastroProjetoDto {
     private String titulo;
     private String relato;
-    private String orcamento;
+    private Double orcamento;
     private String status;
     private Long ongId;
 
@@ -23,11 +23,11 @@ public class CadastroProjetoDto {
         this.relato = relato;
     }
 
-    public String getOrcamento() {
+    public Double getOrcamento() {
         return orcamento;
     }
 
-    public void setOrcamento(String orcamento) {
+    public void setOrcamento(Double orcamento) {
         this.orcamento = orcamento;
     }
 
