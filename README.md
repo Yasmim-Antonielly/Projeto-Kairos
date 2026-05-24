@@ -1,126 +1,109 @@
-# Projeto Kairós - Back-end & Persistência (ESG Matchmaking & SROI Auditor)
+# Projeto Kairós - ESG Matchmaking & SROI Auditor
 
-Bem-vindo ao repositório do **Projeto Kairós**! Esta é a camada de dados e persistência, focada em aproximar investimentos de impacto de causas sociais reais por meio de Inteligência Artificial e Auditoria de Retorno Social (SROI).
-
-Este módulo garante a integridade de todas as informações de impacto, modelando a estrutura relacional no banco de dados Oracle, fornecendo persistência robusta via JDBC no Java, expondo APIs RESTful (Jersey/Grizzly) e automatizando a triagem de dados não estruturados (recibos e fotos) com um script inteligente.
+Bem-vindo à documentação oficial do **Projeto Kairós**. Este sistema completo (Full-Stack) tem como objetivo conectar **Projetos Sociais e ONGs** a **Investidores** com foco em métricas ESG (Ambiental, Social e Governança), garantindo transparência através de cálculos preditivos de impacto social (SROI) e auditorias automatizadas por Inteligência Artificial.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🏗️ Arquitetura da Solução
 
-* **Linguagem Principal:** Java 11 (com padrão de injeção Grizzly/Jersey)
-* **Persistência & JDBC:** Oracle Database (`ojdbc8`)
-* **Mapeamento de Dados:** `ModelMapper` (DTO mapping)
-* **Triagem de Dados (Auditor Inteligente):** Python 3 (Pipeline CLI)
-* **Integração IA:** Groq API (Llama 3.1 8B Instant)
+O sistema é dividido em três camadas principais:
 
----
-
-## 📂 Estrutura de Pacotes do Projeto
-
-Seguindo o padrão de arquitetura modular adotado na sua base de código, as novas implementações foram organizadas da seguinte forma:
-
-```text
-src/com.kairos/main/java/
-├── dao/                  # Classes de Acesso a Dados (JDBC CRUD)
-│   ├── ProjetoSocialDao.java
-│   ├── InvestidorDao.java
-│   └── AuditoriaImpactoDao.java
-├── dto/                  # Data Transfer Objects (Payloads seguros)
-│   ├── Cadastro/DetalhesProjetoSocialDto.java
-│   ├── Cadastro/DetalhesInvestidorDto.java
-│   └── Cadastro/DetalhesAuditoriaImpactoDto.java
-├── model/                # Entidades Java (Tabelas)
-│   ├── ProjetoSocial.java
-│   ├── Investidor.java
-│   └── AuditoriaImpacto.java
-├── org/example/
-│   ├── Main.java         # Inicialização do Servidor REST Grizzly
-│   └── MainDatabaseTest.java # Suite de Teste de Integração JDBC
-└── resource/             # Controladores REST (JAX-RS Jersey)
-    ├── ProjetoSocialResource.java
-    ├── InvestidorResource.java
-    └── AuditoriaImpactoResource.java
-```
+1. **Banco de Dados Relacional (Oracle 21c):** Roda de forma independente via container Docker.
+2. **Back-End API (Java 17 + Jersey/Grizzly):** Fornece a persistência via JDBC puro, expõe as rotas RESTful da aplicação e se comunica com o motor de IA.
+3. **Front-End (React + Vite + TailwindCSS):** Oferece a interface administrativa rica (Dashboard) e se comunica com o Back-End via proxy.
+4. **Inteligência Artificial (Groq - Llama 3.1 8B):** Integrada ao Java para processar relatórios em texto natural e retornar análises automatizadas de impacto social.
 
 ---
 
-## 💾 1. Configurando o Banco de Dados (Oracle SQL)
+## 📌 Pré-requisitos
 
-O script `schema.sql` na raiz do projeto está totalmente pronto para configurar seu banco de dados local ou na nuvem da FIAP.
+Para rodar este projeto, você precisará ter instalado na sua máquina:
 
-### Como executar:
-1. Abra o **SQL Developer** ou a CLI do Oracle (`sqlplus`).
-2. Conecte-se com as credenciais cadastradas na classe `ConnectionFactory` (Usuário: `C##kairos` e Senha: `k123`, ou altere na factory).
-3. Abra e execute todo o conteúdo do arquivo:
-   * **[schema.sql](file:///c:/Users/Admin/Downloads/Projeto-Kairos/schema.sql)**
-
-O script criará as tabelas `KAIROS_PROJETO_SOCIAL`, `KAIROS_INVESTIDOR` e `KAIROS_AUDITORIA_IMPACTO`, configurará as sequences automáticas para IDs e inserirá dados de semente (mock data) para testes imediatos.
+* **Docker** e **Docker Compose**
+* **Java Development Kit (JDK) 17**
+* **Apache Maven**
+* **Node.js** (versão 16 ou superior)
+* **Conta na plataforma Groq** (para obter a chave de API gratuita)
 
 ---
 
-## ☕ 2. Entidades & APIs REST
+## 🚀 Como Executar o Projeto Localmente
 
-### 🔹 Projeto Social
-Representa os projetos ou ONGs necessitando de investimentos.
-* **POST** `/projetos-sociais`: Cadastrar novo projeto social.
-* **GET** `/projetos-sociais`: Listar todos os projetos cadastrados.
-* **GET** `/projetos-sociais/{id}`: Obter detalhes por ID.
-* **PUT** `/projetos-sociais/{id}`: Atualizar dados do projeto.
-* **DELETE** `/projetos-sociais/{id}`: Excluir projeto.
+O passo a passo abaixo garante que todos os microsserviços subam na ordem correta, prevenindo falhas de conexão.
 
-### 🔹 Investidor
-Representa os investidores-anjo ou fundos ESG e suas teses de investimento.
-* **POST** `/investidores`: Cadastrar investidor.
-* **GET** `/investidores`: Listar todos os investidores.
-* **GET** `/investidores/{id}`: Obter detalhes por ID.
-* **PUT** `/investidores/{id}`: Atualizar investidor.
-* **DELETE** `/investidores/{id}`: Excluir investidor.
-
-### 🔹 Auditoria de Impacto (Auditor Inteligente)
-Centraliza os dados de recibos, fotos e faz previsões do Retorno Social sobre o Investimento (SROI).
-Ao cadastrar uma auditoria:
-1. O backend **calcula o SROI de forma preditiva** com base na categoria ESG do projeto.
-2. Aciona o serviço de **Inteligência Artificial (Groq Llama 3.1)** para auditar e extrair os pontos fortes, escalabilidade e beneficiados a partir dos dados textuais brutos.
-3. Salva todo o relatório consolidado na tabela `KAIROS_AUDITORIA_IMPACTO`.
-
-* **POST** `/auditorias`: Submeter novo lote de dados brutos e iniciar Auditoria SROI por IA.
-* **GET** `/auditorias`: Listar histórico de auditorias.
-* **GET** `/auditorias/{id}`: Obter relatório completo de auditoria por ID.
-* **GET** `/auditorias/projeto/{projetoId}`: Listar todas as auditorias daquele projeto social.
-
----
-
-## 🐍 3. Auditor Inteligente: Pipeline de Triagem (Python)
-
-Como Engenheiro de Dados, você tem um script CLI avançado em `scripts/organizar_dados_brutos.py` que organiza e indexa os arquivos recebidos em um diretório temporário para alimentar o fluxo de Auditoria SROI.
-
-### Como utilizar:
-
-1. **Inicializar a Estrutura:**
+### Passo 1: Banco de Dados (Docker)
+1. Abra o terminal na pasta raiz do projeto Back-End (`Projeto-Kairos`).
+2. Suba o container do banco de dados (que mapeia a porta `1521` localmente):
    ```bash
-   python scripts/organizar_dados_brutos.py --init
+   docker compose up -d
    ```
-   *Isso criará a pasta estruturada `raw_data/` com subpastas `receipts`, `photos`, `reports`, além de criar arquivos fictícios (recibos e fotos do Projeto 1) na pasta temporária `input_temp` para testes.*
-
-2. **Executar a Triagem e Indexação:**
+3. Aguarde cerca de 1 a 2 minutos para que o Oracle Database inicie totalmente pela primeira vez.
+4. Execute o arquivo de estruturação (schema) direto de dentro do container para criar as tabelas e as dezenas de `seeds` já pré-configurados:
    ```bash
-   python scripts/organizar_dados_brutos.py --organize
+   sudo docker exec -i oracle-kairos sqlplus kairos/k123@localhost:1521/XEPDB1 < schema.sql
    ```
-   *O script irá varrer a pasta temporária, extrair os dados e valores de recibos (somando-os automaticamente), mover as fotos e gerar um manifesto em JSON (`raw_data/auditoria_dados_projeto_1.json`) formatado, pronto para ser enviado via REST para o back-end Java!*
+
+### Passo 2: Back-End (Java) & IA
+O Back-End necessita de uma chave de API da Groq para a funcionalidade de auditoria.
+
+1. No terminal do `Projeto-Kairos`, exporte a variável de ambiente (substitua pela sua chave real):
+   ```bash
+   export GROQ_API_KEY="gsk_SUA_CHAVE_AQUI_..."
+   ```
+2. Compile e inicie o servidor embutido Grizzly/Jersey (que rodará na porta `8080`):
+   ```bash
+   mvn clean compile exec:java
+   ```
+3. Mantenha esse terminal aberto.
+
+### Passo 3: Front-End (Vite/React)
+1. Abra um **novo terminal** na pasta do front-end (`kairos-front`).
+2. Instale os pacotes:
+   ```bash
+   npm install
+   ```
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+4. Abra o seu navegador e acesse **`http://localhost:5173`**.
+   *(O Vite já está configurado com um proxy interno que redireciona todas as requisições `/api` diretamente para a porta `8080` do seu Java, eliminando qualquer problema de CORS).*
 
 ---
 
-## 🧪 4. Executando os Testes de Integração JDBC
+## 🗄️ Estrutura do Banco de Dados
 
-Criamos a classe **`MainDatabaseTest.java`** que executa todo o fluxo de ponta a ponta das operações JDBC no banco de dados para provar que a persistência está impecável.
+As entidades do ecossistema foram projetadas para atender às normas ESG:
 
-Ela realiza:
-1. Conexão com o Oracle Database.
-2. Inserção de um `ProjetoSocial`.
-3. Inserção de um `Investidor`.
-4. Inserção da `AuditoriaImpacto` vinculando ambos e salvando SROI e Análise IA.
-5. Listagem de todos os dados salvos.
-6. Limpeza e higienização segura (remover os dados criados para manter o banco consistente).
+* **`KAIROS_ONG`**: Mantém o cadastro e informações legais das ONGs.
+* **`KAIROS_PROJETO`**: Armazena os subprojetos conduzidos por uma determinada ONG.
+* **`KAIROS_PROJETO_SOCIAL`**: Formato genérico/extensivo de um projeto, focado na captação do investimento e no cálculo das metas para a comunidade e categoria ESG (Ambiental, Social ou Governança).
+* **`KAIROS_INVESTIDOR`**: Organizações dispostas a injetar capital em causas baseadas em suas Teses de Investimento (Corporate Ventures, Anjos, etc).
+* **`KAIROS_AUDITORIA_IMPACTO`**: Tabela gerada durante o processo de avaliação SROI, consolidando valores investidos, retornos sociais gerados, comprovantes brutos e o log da análise sintática feita pela Inteligência Artificial.
 
-Seu projeto está estruturado e documentado no mais alto nível profissional!
+---
+
+## 🔌 Principais Endpoints (API REST)
+
+O back-end trafega JSON através das seguintes rotas primárias:
+
+### ONGs e Projetos
+* `GET /ong`: Lista todas as ONGs.
+* `GET /projetos`: Lista todos os projetos vinculados às ONGs.
+* `POST /projetos/{id}/sroi`: Aciona o pipeline de auditoria e IA para consolidar e retornar o relatório SROI (Retorno Social sobre Investimento) daquele projeto específico.
+
+### Projetos Sociais & Investidores (Matchmaking)
+* `GET /projetos-sociais`: Lista o perfil de captação ESG dos projetos.
+* `GET /investidores`: Retorna as teses e capacidades de capital dos fundos.
+
+### Auditorias Consistidas
+* `GET /auditorias`: Recupera o histórico auditado de projetos, com logs diretos da análise gerada via Groq LLM.
+
+---
+
+## 🧠 Integração com Inteligência Artificial
+A auditoria manual de recibos e evidências sociais é custosa. Este projeto mitiga esse gargalo enviando resumos do progresso para o modelo **Llama 3.1 8B Instant** fornecido via Groq. A IA recebe um prompt sistêmico como `"auditor ESG especialista em impacto financeiro e métricas SROI"` e avalia instantaneamente quais são os pontos focais daquele relato, validando a integridade da solicitação antes de gravar o índice definitivo no banco.
+
+---
+
+> Projeto desenvolvido como demonstração arquitetural completa conectando banco de dados corporativo, back-end assíncrono em Java e front-end responsivo, garantindo as melhores práticas e padrões de mercado.
